@@ -33,6 +33,10 @@ python tracking.py model=yolov8n.pt source="VIDEO_NAME" show=True
 
 Далее видео сохраняется по пути `detect/runs/train*/VIDEO_NAME.mp4`
 
+## Пре-коммит
+```
+pre-commit run --all-files
+```
 
 ## Исходник
 https://github.com/noorkhokhar99/YOLOv8-Object-Detection-with-DeepSORT-Tracking

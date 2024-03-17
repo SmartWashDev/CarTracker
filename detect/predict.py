@@ -1,16 +1,23 @@
- # Ultralytics YOLO 🚀, GPL-3.0 license
+# Ultralytics YOLO 🚀, GPL-3.0 license
 
 import hydra
 import torch
-
 from ultralytics.yolo.engine.predictor import BasePredictor
-from ultralytics.yolo.utils import DEFAULT_CONFIG, ROOT, ops
+from ultralytics.yolo.utils import (
+    DEFAULT_CONFIG,
+    ops,
+    ROOT,
+)
 from ultralytics.yolo.utils.checks import check_imgsz
-from ultralytics.yolo.utils.plotting import Annotator, colors, save_one_box
+from ultralytics.yolo.utils.plotting import (
+    Annotator,
+    colors,
+    save_one_box,
+)
 
 
 class DetectionPredictor(BasePredictor):
-    
+
     def get_annotator(self, img):
         return Annotator(img, line_width=self.args.line_thickness, example=str(self.model.names))
 
@@ -21,11 +28,13 @@ class DetectionPredictor(BasePredictor):
         return img
 
     def postprocess(self, preds, img, orig_img):
-        preds = ops.non_max_suppression(preds,
-                                        self.args.conf,
-                                        self.args.iou,
-                                        agnostic=self.args.agnostic_nms,
-                                        max_det=self.args.max_det)
+        preds = ops.non_max_suppression(
+            preds,
+            self.args.conf,
+            self.args.iou,
+            agnostic=self.args.agnostic_nms,
+            max_det=self.args.max_det,
+        )
 
         for i, pred in enumerate(preds):
             shape = orig_img[i].shape if self.webcam else orig_img.shape
@@ -35,7 +44,7 @@ class DetectionPredictor(BasePredictor):
 
     def write_results(self, idx, preds, batch):
         p, im, im0 = batch
-        log_string = ""
+        log_string = ''
         if len(im.shape) == 3:
             im = im[None]  # expand for batch dim
         self.seen += 1
@@ -70,28 +79,37 @@ class DetectionPredictor(BasePredictor):
 
             if self.args.save or self.args.save_crop or self.args.show:  # Add bbox to image
                 c = int(cls)  # integer class
-                label = None if self.args.hide_labels else (
-                    self.model.names[c] if self.args.hide_conf else f'{self.model.names[c]} {conf:.2f}')
+                label = (
+                    None
+                    if self.args.hide_labels
+                    else (self.model.names[c] if self.args.hide_conf else f'{self.model.names[c]} {conf:.2f}')
+                )
                 self.annotator.box_label(xyxy, label, color=colors(c, True))
             if self.args.save_crop:
                 imc = im0.copy()
-                save_one_box(xyxy,
-                             imc,
-                             file=self.save_dir / 'crops' / self.model.model.names[c] / f'{self.data_path.stem}.jpg',
-                             BGR=True)
+                save_one_box(
+                    xyxy,
+                    imc,
+                    file=self.save_dir / 'crops' / self.model.model.names[c] / f'{self.data_path.stem}.jpg',
+                    BGR=True,
+                )
 
         return log_string
 
 
-@hydra.main(version_base=None, config_path=str(DEFAULT_CONFIG.parent), config_name=DEFAULT_CONFIG.name)
+@hydra.main(
+    version_base=None,
+    config_path=str(DEFAULT_CONFIG.parent),
+    config_name=DEFAULT_CONFIG.name,
+)
 def predict(cfg):
 
-    cfg.model = cfg.model or "yolov8n.pt"
+    cfg.model = cfg.model or 'yolov8n.pt'
     cfg.imgsz = check_imgsz(cfg.imgsz, min_dim=2)  # check image size
-    cfg.source = cfg.source if cfg.source is not None else ROOT / "assets"
+    cfg.source = cfg.source if cfg.source is not None else ROOT / 'assets'
     predictor = DetectionPredictor(cfg)
     predictor()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     predict()

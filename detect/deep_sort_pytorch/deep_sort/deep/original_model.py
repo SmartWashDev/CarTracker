@@ -5,29 +5,20 @@ import torch.nn.functional as F
 
 class BasicBlock(nn.Module):
     def __init__(self, c_in, c_out, is_downsample=False):
-        super(BasicBlock, self).__init__()
+        super().__init__()
         self.is_downsample = is_downsample
         if is_downsample:
-            self.conv1 = nn.Conv2d(
-                c_in, c_out, 3, stride=2, padding=1, bias=False)
+            self.conv1 = nn.Conv2d(c_in, c_out, 3, stride=2, padding=1, bias=False)
         else:
-            self.conv1 = nn.Conv2d(
-                c_in, c_out, 3, stride=1, padding=1, bias=False)
+            self.conv1 = nn.Conv2d(c_in, c_out, 3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(c_out)
         self.relu = nn.ReLU(True)
-        self.conv2 = nn.Conv2d(c_out, c_out, 3, stride=1,
-                               padding=1, bias=False)
+        self.conv2 = nn.Conv2d(c_out, c_out, 3, stride=1, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(c_out)
         if is_downsample:
-            self.downsample = nn.Sequential(
-                nn.Conv2d(c_in, c_out, 1, stride=2, bias=False),
-                nn.BatchNorm2d(c_out)
-            )
+            self.downsample = nn.Sequential(nn.Conv2d(c_in, c_out, 1, stride=2, bias=False), nn.BatchNorm2d(c_out))
         elif c_in != c_out:
-            self.downsample = nn.Sequential(
-                nn.Conv2d(c_in, c_out, 1, stride=1, bias=False),
-                nn.BatchNorm2d(c_out)
-            )
+            self.downsample = nn.Sequential(nn.Conv2d(c_in, c_out, 1, stride=1, bias=False), nn.BatchNorm2d(c_out))
             self.is_downsample = True
 
     def forward(self, x):
@@ -45,15 +36,19 @@ def make_layers(c_in, c_out, repeat_times, is_downsample=False):
     blocks = []
     for i in range(repeat_times):
         if i == 0:
-            blocks += [BasicBlock(c_in, c_out, is_downsample=is_downsample), ]
+            blocks += [
+                BasicBlock(c_in, c_out, is_downsample=is_downsample),
+            ]
         else:
-            blocks += [BasicBlock(c_out, c_out), ]
+            blocks += [
+                BasicBlock(c_out, c_out),
+            ]
     return nn.Sequential(*blocks)
 
 
 class Net(nn.Module):
     def __init__(self, num_classes=625, reid=False):
-        super(Net, self).__init__()
+        super().__init__()
         # 3 128 64
         self.conv = nn.Sequential(
             nn.Conv2d(3, 32, 3, stride=1, padding=1),
@@ -73,9 +68,9 @@ class Net(nn.Module):
         # 128 16 8
         self.dense = nn.Sequential(
             nn.Dropout(p=0.6),
-            nn.Linear(128*16*8, 128),
+            nn.Linear(128 * 16 * 8, 128),
             nn.BatchNorm1d(128),
-            nn.ELU(inplace=True)
+            nn.ELU(inplace=True),
         )
         # 256 1 1
         self.reid = reid
@@ -108,4 +103,5 @@ if __name__ == '__main__':
     x = torch.randn(4, 3, 128, 64)
     y = net(x)
     import ipdb
+
     ipdb.set_trace()

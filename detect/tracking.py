@@ -1,25 +1,23 @@
 # Ultralytics YOLO 🚀, GPL-3.0 license
 
-import hydra
-import torch
-import argparse
-import time
-from pathlib import Path
+from collections import deque
 
 import cv2
+import hydra
+import numpy as np
 import torch
-import torch.backends.cudnn as cudnn
+from deep_sort_pytorch.deep_sort import DeepSort
+from deep_sort_pytorch.utils.parser import get_config
 from numpy import random
 from ultralytics.yolo.engine.predictor import BasePredictor
-from ultralytics.yolo.utils import DEFAULT_CONFIG, ROOT, ops
+from ultralytics.yolo.utils import (
+    DEFAULT_CONFIG,
+    ops,
+    ROOT,
+)
 from ultralytics.yolo.utils.checks import check_imgsz
-from ultralytics.yolo.utils.plotting import Annotator, colors, save_one_box
+from ultralytics.yolo.utils.plotting import Annotator
 
-import cv2
-from deep_sort_pytorch.utils.parser import get_config
-from deep_sort_pytorch.deep_sort import DeepSort
-from collections import deque
-import numpy as np
 
 palette = (2**11 - 1, 2**15 - 1, 2**20 - 1)
 data_deque = {}
@@ -30,7 +28,7 @@ deepsort = None
 def init_tracker():
     global deepsort
     cfg_deep = get_config()
-    cfg_deep.merge_from_file("deep_sort_pytorch/configs/deep_sort.yaml")
+    cfg_deep.merge_from_file('deep_sort_pytorch/configs/deep_sort.yaml')
 
     deepsort = DeepSort(
         cfg_deep.DEEPSORT.REID_CKPT,
@@ -62,7 +60,7 @@ def xyxy_to_xywh(*xyxy):
 def xyxy_to_tlwh(bbox_xyxy):
     tlwh_bboxs = []
     for i, box in enumerate(bbox_xyxy):
-        x1, y1, x2, y2 = [int(i) for i in box]
+        x1, y1, x2, y2 = (int(i) for i in box)
         top = x1
         left = y1
         w = int(x2 - x1)
@@ -122,9 +120,7 @@ def draw_border(img, pt1, pt2, color, thickness, r, d):
 
 def UI_box(x, img, color=None, label=None, line_thickness=None):
     # Plots one bounding box on image img
-    tl = (
-        line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1
-    )  # line/font thickness
+    tl = line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
     color = color or [random.randint(0, 255) for _ in range(3)]
     c1, c2 = (int(x[0]), int(x[1])), (int(x[2]), int(x[3]))
     cv2.rectangle(img, c1, c2, color, thickness=tl, lineType=cv2.LINE_AA)
@@ -164,7 +160,7 @@ def draw_boxes(img, bbox, names, object_id, identities=None, offset=(0, 0)):
             data_deque.pop(key)
 
     for i, box in enumerate(bbox):
-        x1, y1, x2, y2 = [int(i) for i in box]
+        x1, y1, x2, y2 = (int(i) for i in box)
         x1 += offset[0]
         x2 += offset[0]
         y1 += offset[1]
@@ -185,7 +181,7 @@ def draw_boxes(img, bbox, names, object_id, identities=None, offset=(0, 0)):
 
         color = compute_color_for_labels(object_id[i])
         obj_name = names[object_id[i]]
-        label = "{}{:d}".format("", id) + ":" + "%s" % (obj_name)
+        label = '{}{:d}'.format('', id) + ':' + '%s' % (obj_name)
 
         # add center to buffer
         data_deque[id].appendleft(center)
@@ -205,9 +201,7 @@ def draw_boxes(img, bbox, names, object_id, identities=None, offset=(0, 0)):
 class DetectionPredictor(BasePredictor):
 
     def get_annotator(self, img):
-        return Annotator(
-            img, line_width=self.args.line_thickness, example=str(self.model.names)
-        )
+        return Annotator(img, line_width=self.args.line_thickness, example=str(self.model.names))
 
     def preprocess(self, img):
         img = torch.from_numpy(img).to(self.model.device)
@@ -232,23 +226,21 @@ class DetectionPredictor(BasePredictor):
 
     def write_results(self, idx, preds, batch):
         p, im, im0 = batch
-        log_string = ""
+        log_string = ''
         if len(im.shape) == 3:
             im = im[None]  # expand for batch dim
         self.seen += 1
         im0 = im0.copy()
         if self.webcam:  # batch_size >= 1
-            log_string += f"{idx}: "
+            log_string += f'{idx}: '
             frame = self.dataset.count
         else:
-            frame = getattr(self.dataset, "frame", 0)
+            frame = getattr(self.dataset, 'frame', 0)
 
         self.data_path = p
-        save_path = str(self.save_dir / p.name)  # im.jpg
-        self.txt_path = str(self.save_dir / "labels" / p.stem) + (
-            "" if self.dataset.mode == "image" else f"_{frame}"
-        )
-        log_string += "%gx%g " % im.shape[2:]  # print string
+        str(self.save_dir / p.name)  # im.jpg
+        self.txt_path = str(self.save_dir / 'labels' / p.stem) + ('' if self.dataset.mode == 'image' else f'_{frame}')
+        log_string += '%gx%g ' % im.shape[2:]  # print string
         self.annotator = self.get_annotator(im0)
 
         det = preds[idx]
@@ -259,7 +251,7 @@ class DetectionPredictor(BasePredictor):
             n = (det[:, 5] == c).sum()  # detections per class
             log_string += f"{n} {self.model.names[int(c)]}{'s' * (n > 1)}, "
         # write
-        gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
+        torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
         xywh_bboxs = []
         confs = []
         oids = []
@@ -291,12 +283,12 @@ class DetectionPredictor(BasePredictor):
 )
 def predict(cfg):
     init_tracker()
-    cfg.model = cfg.model or "yolov8n.pt"
+    cfg.model = cfg.model or 'yolov8n.pt'
     cfg.imgsz = check_imgsz(cfg.imgsz, min_dim=2)  # check image size
-    cfg.source = cfg.source if cfg.source is not None else ROOT / "assets"
+    cfg.source = cfg.source if cfg.source is not None else ROOT / 'assets'
     predictor = DetectionPredictor(cfg)
     predictor()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     predict()

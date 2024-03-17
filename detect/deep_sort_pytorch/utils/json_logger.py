@@ -2,13 +2,14 @@
 References:
     https://medium.com/analytics-vidhya/creating-a-custom-logging-mechanism-for-real-time-object-detection-using-tdd-4ca2cfcd0a2f
 """
+
 import json
+from datetime import datetime
 from os import makedirs
 from os.path import exists, join
-from datetime import datetime
 
 
-class JsonMeta(object):
+class JsonMeta:
     HOURS = 3
     MINUTES = 59
     SECONDS = 59
@@ -16,7 +17,7 @@ class JsonMeta(object):
     DEFAULT_FILE_NAME = 'remaining'
 
 
-class BaseJsonLogger(object):
+class BaseJsonLogger:
     """
     This is the base class that returns __dict__ of its own
     it also returns the dicts of objects in the attributes that are list instances
@@ -117,7 +118,7 @@ class Frame(BaseJsonLogger):
         if bbox_id not in bboxes_ids:
             self.bboxes.append(Bbox(bbox_id, top, left, width, height))
         else:
-            raise ValueError("Frame with id: {} already has a Bbox with id: {}".format(self.frame_id, bbox_id))
+            raise ValueError(f'Frame with id: {self.frame_id} already has a Bbox with id: {bbox_id}')
 
     def add_label_to_bbox(self, bbox_id: int, category: str, confidence: float):
         bboxes = {bbox.id: bbox for bbox in self.bboxes}
@@ -125,7 +126,7 @@ class Frame(BaseJsonLogger):
             res = bboxes.get(bbox_id)
             res.add_label(category, confidence)
         else:
-            raise ValueError('the bbox with id: {} does not exists!'.format(bbox_id))
+            raise ValueError(f'the bbox with id: {bbox_id} does not exists!')
 
 
 class BboxToJsonLogger(BaseJsonLogger):
@@ -174,8 +175,9 @@ class BboxToJsonLogger(BaseJsonLogger):
 
     def __init__(self, top_k_labels: int = 1):
         self.frames = {}
-        self.video_details = self.video_details = dict(frame_width=None, frame_height=None, frame_rate=None,
-                                                       video_name=None)
+        self.video_details = self.video_details = dict(
+            frame_width=None, frame_height=None, frame_rate=None, video_name=None
+        )
         self.top_k_labels = top_k_labels
         self.start_time = datetime.now()
 
@@ -208,7 +210,7 @@ class BboxToJsonLogger(BaseJsonLogger):
         if not self.frame_exists(frame_id):
             self.frames[frame_id] = Frame(frame_id, timestamp)
         else:
-            raise ValueError("Frame id: {} already exists".format(frame_id))
+            raise ValueError(f'Frame id: {frame_id} already exists')
 
     def bbox_exists(self, frame_id: int, bbox_id: int) -> bool:
         """
@@ -238,7 +240,7 @@ class BboxToJsonLogger(BaseJsonLogger):
             ValueError: if bbox_id does not exist in the bbox list of specific frame.
         """
         if not self.bbox_exists(frame_id, bbox_id):
-            raise ValueError("frame with id: {} does not contain bbox with id: {}".format(frame_id, bbox_id))
+            raise ValueError(f'frame with id: {frame_id} does not contain bbox with id: {bbox_id}')
         bboxes = {bbox.bbox_id: bbox for bbox in self.frames[frame_id].bboxes}
         return bboxes.get(bbox_id)
 
@@ -265,10 +267,9 @@ class BboxToJsonLogger(BaseJsonLogger):
             if not self.bbox_exists(frame_id, bbox_id):
                 frame.add_bbox(bbox_id, top, left, width, height)
             else:
-                raise ValueError(
-                    "frame with frame_id: {} already contains the bbox with id: {} ".format(frame_id, bbox_id))
+                raise ValueError(f'frame with frame_id: {frame_id} already contains the bbox with id: {bbox_id} ')
         else:
-            raise ValueError("frame with frame_id: {} does not exist".format(frame_id))
+            raise ValueError(f'frame with frame_id: {frame_id} does not exist')
 
     def add_label_to_bbox(self, frame_id: int, bbox_id: int, category: str, confidence: float):
         """
@@ -288,10 +289,15 @@ class BboxToJsonLogger(BaseJsonLogger):
         if not bbox.labels_full(self.top_k_labels):
             bbox.add_label(category, confidence)
         else:
-            raise ValueError("labels in frame_id: {}, bbox_id: {} is fulled".format(frame_id, bbox_id))
+            raise ValueError(f'labels in frame_id: {frame_id}, bbox_id: {bbox_id} is fulled')
 
-    def add_video_details(self, frame_width: int = None, frame_height: int = None, frame_rate: int = None,
-                          video_name: str = None):
+    def add_video_details(
+        self,
+        frame_width: int = None,
+        frame_height: int = None,
+        frame_rate: int = None,
+        video_name: str = None,
+    ):
         self.video_details['frame_width'] = frame_width
         self.video_details['frame_height'] = frame_height
         self.video_details['frame_rate'] = frame_rate
@@ -323,8 +329,13 @@ class BboxToJsonLogger(BaseJsonLogger):
     def set_start(self):
         self.start_time = datetime.now()
 
-    def schedule_output_by_time(self, output_dir=JsonMeta.PATH_TO_SAVE, hours: int = 0, minutes: int = 0,
-                                seconds: int = 60) -> None:
+    def schedule_output_by_time(
+        self,
+        output_dir=JsonMeta.PATH_TO_SAVE,
+        hours: int = 0,
+        minutes: int = 0,
+        seconds: int = 60,
+    ) -> None:
         """
         Notes:
             Creates folder and then periodically stores the jsons on that address.

@@ -2,15 +2,15 @@ import numpy as np
 import torch
 
 from .deep.feature_extractor import Extractor
-from .sort.nn_matching import NearestNeighborDistanceMetric
 from .sort.detection import Detection
+from .sort.nn_matching import NearestNeighborDistanceMetric
 from .sort.tracker import Tracker
 
 
-__all__ = ["DeepSort"]
+__all__ = ['DeepSort']
 
 
-class DeepSort(object):
+class DeepSort:
     def __init__(
         self,
         model_path,
@@ -29,10 +29,8 @@ class DeepSort(object):
         self.extractor = Extractor(model_path, use_cuda=use_cuda)
 
         max_cosine_distance = max_dist
-        metric = NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
-        self.tracker = Tracker(
-            metric, max_iou_distance=max_iou_distance, max_age=max_age, n_init=n_init
-        )
+        metric = NearestNeighborDistanceMetric('cosine', max_cosine_distance, nn_budget)
+        self.tracker = Tracker(metric, max_iou_distance=max_iou_distance, max_age=max_age, n_init=n_init)
 
     def update(self, bbox_xywh, confidences, oids, ori_img):
         self.height, self.width = ori_img.shape[:2]
@@ -46,8 +44,8 @@ class DeepSort(object):
         ]
 
         # run on non-maximum supression
-        boxes = np.array([d.tlwh for d in detections])
-        scores = np.array([d.confidence for d in detections])
+        np.array([d.tlwh for d in detections])
+        np.array([d.confidence for d in detections])
 
         # update tracker
         self.tracker.predict()
@@ -111,7 +109,7 @@ class DeepSort(object):
         x1, y1, x2, y2 = bbox_xyxy
 
         t = x1
-        l = y1
+        l = y1  # noqa: E741
         w = int(x2 - x1)
         h = int(y2 - y1)
         return t, l, w, h

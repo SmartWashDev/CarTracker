@@ -1,12 +1,15 @@
-import os
-import numpy as np
 import copy
+import os
+
 import motmetrics as mm
+import numpy as np
+
+
 mm.lap.default_solver = 'lap'
-from utils.io import read_results, unzip_objs
+from utils.io import read_results, unzip_objs  # noqa
 
 
-class Evaluator(object):
+class Evaluator:
 
     def __init__(self, data_root, seq_name, data_type):
         self.data_root = data_root
@@ -38,7 +41,6 @@ class Evaluator(object):
         # ignore boxes
         ignore_objs = self.gt_ignore_frame_dict.get(frame_id, [])
         ignore_tlwhs = unzip_objs(ignore_objs)[0]
-
 
         # remove ignored results
         keep = np.ones(len(trk_tlwhs), dtype=bool)
@@ -79,25 +81,25 @@ class Evaluator(object):
         return self.acc
 
     @staticmethod
-    def get_summary(accs, names, metrics=('mota', 'num_switches', 'idp', 'idr', 'idf1', 'precision', 'recall')):
+    def get_summary(
+        accs,
+        names,
+        metrics=('mota', 'num_switches', 'idp', 'idr', 'idf1', 'precision', 'recall'),
+    ):
         names = copy.deepcopy(names)
         if metrics is None:
             metrics = mm.metrics.motchallenge_metrics
         metrics = copy.deepcopy(metrics)
 
         mh = mm.metrics.create()
-        summary = mh.compute_many(
-            accs,
-            metrics=metrics,
-            names=names,
-            generate_overall=True
-        )
+        summary = mh.compute_many(accs, metrics=metrics, names=names, generate_overall=True)
 
         return summary
 
     @staticmethod
     def save_summary(summary, filename):
         import pandas as pd
+
         writer = pd.ExcelWriter(filename)
         summary.to_excel(writer)
         writer.save()

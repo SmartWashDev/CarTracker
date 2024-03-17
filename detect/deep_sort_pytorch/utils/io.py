@@ -1,8 +1,6 @@
 import os
-from typing import Dict
-import numpy as np
 
-# from utils.log import get_logger
+import numpy as np
 
 
 def write_results(filename, results, data_type):
@@ -26,39 +24,11 @@ def write_results(filename, results, data_type):
                 f.write(line)
 
 
-# def write_results(filename, results_dict: Dict, data_type: str):
-#     if not filename:
-#         return
-#     path = os.path.dirname(filename)
-#     if not os.path.exists(path):
-#         os.makedirs(path)
-
-#     if data_type in ('mot', 'mcmot', 'lab'):
-#         save_format = '{frame},{id},{x1},{y1},{w},{h},1,-1,-1,-1\n'
-#     elif data_type == 'kitti':
-#         save_format = '{frame} {id} pedestrian -1 -1 -10 {x1} {y1} {x2} {y2} -1 -1 -1 -1000 -1000 -1000 -10 {score}\n'
-#     else:
-#         raise ValueError(data_type)
-
-#     with open(filename, 'w') as f:
-#         for frame_id, frame_data in results_dict.items():
-#             if data_type == 'kitti':
-#                 frame_id -= 1
-#             for tlwh, track_id in frame_data:
-#                 if track_id < 0:
-#                     continue
-#                 x1, y1, w, h = tlwh
-#                 x2, y2 = x1 + w, y1 + h
-#                 line = save_format.format(frame=frame_id, id=track_id, x1=x1, y1=y1, x2=x2, y2=y2, w=w, h=h, score=1.0)
-#                 f.write(line)
-#     logger.info('Save results to {}'.format(filename))
-
-
 def read_results(filename, data_type: str, is_gt=False, is_ignore=False):
     if data_type in ('mot', 'lab'):
         read_fun = read_mot_results
     else:
-        raise ValueError('Unknown data type: {}'.format(data_type))
+        raise ValueError(f'Unknown data type: {data_type}')
 
     return read_fun(filename, is_gt, is_ignore)
 
@@ -86,7 +56,7 @@ def read_mot_results(filename, is_gt, is_ignore):
     ignore_labels = {2, 7, 8, 12}
     results_dict = dict()
     if os.path.isfile(filename):
-        with open(filename, 'r') as f:
+        with open(filename) as f:
             for line in f.readlines():
                 linelist = line.split(',')
                 if len(linelist) < 7:
