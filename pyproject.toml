@@ -1,0 +1,17 @@
+[project]
+name = 'car_tracker'
+version = '0.1.0'
+description = ''
+
+[tool.isort]
+profile = 'black'
+line_length = 120
+lines_after_imports = 2
+force_alphabetical_sort_within_sections = true
+
+[tool.black]
+line-length = 120
+skip-string-normalization = true
+
+[tool.flake8]
+max-line-length = 120
