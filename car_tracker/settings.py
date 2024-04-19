@@ -21,12 +21,15 @@ class Settings:
     def __post_init__(self):
         self.MINIO_SECURE = True if 'https' in self.MINIO_URL else False
 
+    # Car tracker
+    VIDEO_SOURCE: str = 'wash_short_video.mp4'
+
     # General settings
     SENTRY_DSN: str = ''
 
     # MINIO
     MINIO_URL: str = 'http://127.0.0.1:9000'
-    MINIO_ACCESS_KEY: str = ('access_key',)
+    MINIO_ACCESS_KEY: str = 'access_key'
     MINIO_SECRET_KEY: str = 'secret_key'
     MINIO_BUCKET_NAME: str = 'cars'
     MINIO_SECURE: bool = False

@@ -4,11 +4,11 @@ import pkg_resources
 
 
 model_file = pkg_resources.resource_filename(
-    'VehicleDetectionTracker',
+    'vehicle_detection_tracker',
     'data/model-weights-spectrico-car-colors-mobilenet-224x224-052EAC82.pb',
 )  # path to the car color classifier
 label_file = pkg_resources.resource_filename(
-    'VehicleDetectionTracker', 'data/color_labels.txt'
+    'vehicle_detection_tracker', 'data/color_labels.txt'
 )  # path to the text file, containing list with the supported makes and models
 input_layer = 'input_1'
 output_layer = 'softmax/Softmax'

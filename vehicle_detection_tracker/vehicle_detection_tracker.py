@@ -8,8 +8,8 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 from ultralytics.utils.plotting import colors
-from VehicleDetectionTracker.color_classifier.classifier import Classifier as ColorClassifier
-from VehicleDetectionTracker.model_classifier.classifier import Classifier as ModelClassifier
+from vehicle_detection_tracker.color_classifier.classifier import Classifier as ColorClassifier
+from vehicle_detection_tracker.model_classifier.classifier import Classifier as ModelClassifier
 
 
 class VehicleDetectionTracker:
@@ -288,7 +288,7 @@ class VehicleDetectionTracker:
 
         return response
 
-    def process_video(self, video_path, result_callback):
+    def process_video(self, video_path, result_callback, show=False):
         """
         Process a video by calling a callback for each frame's results.
 
@@ -308,7 +308,7 @@ class VehicleDetectionTracker:
                 response = self.process_frame(frame, timestamp)
                 if 'annotated_frame_base64' in response:
                     annotated_frame = self._decode_image_base64(response['annotated_frame_base64'])
-                    if annotated_frame is not None:
+                    if annotated_frame is not None and show:
                         # Display the annotated frame in a window
                         cv2.imshow(
                             'Video Detection Tracker - YOLOv8 + bytetrack',

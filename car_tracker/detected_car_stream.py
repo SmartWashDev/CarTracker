@@ -4,13 +4,14 @@ from dataclasses import asdict
 import nats
 
 from car_tracker.structs import DetectedCar
+from car_tracker.settings import settings
 
 
 class DetectedCarNatsStream:
     def __init__(
         self,
-        nats_server: str = 'nats://localhost:4222',
-        stream_name: str = 'detected_cars',
+        nats_server: str = settings.NATS_URL,
+        stream_name: str = settings.DETECTED_CAR_STREAM_NAME,
     ):
         self.stream_name = stream_name
         self.nats_server = nats_server

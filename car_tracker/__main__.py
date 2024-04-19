@@ -1,4 +1,4 @@
 from car_tracker.application import VideoCarTracker
+from car_tracker.settings import settings
 
-
-VideoCarTracker('wash_short_video.mp4').run()
+VideoCarTracker(settings.VIDEO_SOURCE).run()
