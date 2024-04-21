@@ -4,7 +4,7 @@ import io
 from datetime import datetime
 
 from minio import Minio
-from settings import settings
+from car_tracker.settings import settings
 
 from car_tracker.detected_car_stream import DetectedCarNatsStream
 from car_tracker.structs import DetectedCar, TrackingResponse

@@ -4,7 +4,7 @@
 import cv2
 import numpy as np
 import tensorflow.compat.v1 as tf
-import VehicleDetectionTracker.color_classifier.config as config
+import vehicle_detection_tracker.color_classifier.config as config
 
 
 model_file = config.model_file
